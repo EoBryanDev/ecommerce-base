@@ -1,5 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import z from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -20,6 +22,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { authClient } from "@/lib/auth-client";
 
 const signUpSchema = z
   .object({
@@ -41,6 +44,7 @@ const signUpSchema = z
 type TSignUpSchema = z.infer<typeof signUpSchema>;
 
 const SignUpForm = () => {
+  const router = useRouter();
   const sign_up_form = useForm<TSignUpSchema>({
     resolver: zodResolver(signUpSchema),
     defaultValues: {
@@ -51,8 +55,27 @@ const SignUpForm = () => {
     },
   });
 
-  const onSubmit = (data: TSignUpSchema) => {
-    console.log(data);
+  const onSubmit = async (values: TSignUpSchema) => {
+    await authClient.signUp.email({
+      name: values.username,
+      email: values.email,
+      password: values.password,
+      fetchOptions: {
+        onSuccess: () => {
+          //   toast.success("Conta criada com sucesso!");
+          router.push("/");
+        },
+        onError: (error) => {
+          if (error.error.code === "USER_ALREADY_EXISTS") {
+            toast.error("E-mail já cadastrado");
+            sign_up_form.setError("email", {
+              message: "E-mail já cadastrado",
+            });
+          }
+          toast.error(error.error.message);
+        },
+      },
+    });
   };
   return (
     <>
