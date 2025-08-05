@@ -1,0 +1,145 @@
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import z from "zod";
+
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+
+const signUpSchema = z
+  .object({
+    username: z.string("Nome inválido").trim().min(2, "Nome inválido"),
+    email: z.email("Email inválido"),
+    password: z.string("Senha inválida").min(8, "Senha inválida"),
+    passwordConfirmation: z.string("Senha inválida"),
+  })
+  .refine(
+    (data) => {
+      return data.password === data.passwordConfirmation;
+    },
+    {
+      error: "As senhas não coincidem",
+      path: ["passwordConfirmation"],
+    },
+  );
+
+type TSignUpSchema = z.infer<typeof signUpSchema>;
+
+const SignUpForm = () => {
+  const sign_up_form = useForm<TSignUpSchema>({
+    resolver: zodResolver(signUpSchema),
+    defaultValues: {
+      username: "",
+      email: "",
+      password: "",
+      passwordConfirmation: "",
+    },
+  });
+
+  const onSubmit = (data: TSignUpSchema) => {
+    console.log(data);
+  };
+  return (
+    <>
+      <Card>
+        <CardHeader>
+          <CardTitle>Criar Conta</CardTitle>
+          <CardDescription>Crie uma conta para continuar</CardDescription>
+        </CardHeader>
+        <Form {...sign_up_form}>
+          <form
+            onSubmit={sign_up_form.handleSubmit(onSubmit)}
+            className="space-y-8"
+          >
+            <CardContent className="grid gap-6">
+              <FormField
+                control={sign_up_form.control}
+                name="username"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nome</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Digite seu nome" {...field} />
+                    </FormControl>
+
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={sign_up_form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Digite seu email" {...field} />
+                    </FormControl>
+
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={sign_up_form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Senha</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Digite sua senha"
+                        {...field}
+                        type="password"
+                      />
+                    </FormControl>
+
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={sign_up_form.control}
+                name="passwordConfirmation"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Confirme sua senha</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Digite a sua senha novamente"
+                        {...field}
+                        type="password"
+                      />
+                    </FormControl>
+
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </CardContent>
+            <CardFooter>
+              <Button type="submit">Entrar</Button>
+            </CardFooter>
+          </form>
+        </Form>
+      </Card>
+    </>
+  );
+};
+
+export default SignUpForm;
