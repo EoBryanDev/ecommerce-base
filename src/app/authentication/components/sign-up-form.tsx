@@ -156,7 +156,9 @@ const SignUpForm = () => {
               />
             </CardContent>
             <CardFooter>
-              <Button type="submit">Entrar</Button>
+              <Button type="submit" className="w-full">
+                Entrar
+              </Button>
             </CardFooter>
           </form>
         </Form>
